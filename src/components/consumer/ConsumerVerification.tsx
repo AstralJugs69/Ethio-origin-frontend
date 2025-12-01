@@ -1,46 +1,19 @@
 import { useState } from 'react';
 import ProductJourney from './ProductJourney';
+import DashboardLayout from '../layout/DashboardLayout';
 
-interface ConsumerVerificationProps {
-  onBack: () => void;
-}
-
-export default function ConsumerVerification({ onBack }: ConsumerVerificationProps) {
+export default function ConsumerVerification() {
   const [scannedProduct, setScannedProduct] = useState<string | null>(null);
 
   const handleScan = () => {
     // Simulate product scanning - use a fixed ID for consistency
-    const mockProductId = 'ETH-COFFEE-GUJI001';
+    const mockProductId = 'EthioCoffee402';
     setScannedProduct(mockProductId);
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center">
-              <button
-                onClick={onBack}
-                className="flex items-center text-purple-600 hover:text-purple-800 mr-6"
-              >
-                ← Back to Roles
-              </button>
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900">Product Verification</h1>
-                <p className="text-gray-600">Scan QR code to verify product origin and journey</p>
-              </div>
-            </div>
-            <div className="bg-purple-100 text-purple-800 px-4 py-2 rounded-full font-medium">
-              🛒 Consumer
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Content */}
-      <div className="max-w-4xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+    <DashboardLayout role="consumer" title="Product Verification" subtitle="Scan QR code to verify product origin and journey">
+      <div className="max-w-4xl mx-auto">
         {!scannedProduct ? (
           <div className="bg-white rounded-xl shadow-lg p-8 text-center">
             <div className="w-32 h-32 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-6">
@@ -50,7 +23,7 @@ export default function ConsumerVerification({ onBack }: ConsumerVerificationPro
             <p className="text-gray-600 mb-8 max-w-md mx-auto">
               Point your camera at the QR code on the product packaging to verify its origin and journey from farm to market.
             </p>
-            
+
             {/* Scanner Simulation */}
             <div className="bg-gray-900 rounded-lg p-8 mb-6 max-w-sm mx-auto">
               <div className="bg-black rounded-lg p-4">
@@ -77,12 +50,12 @@ export default function ConsumerVerification({ onBack }: ConsumerVerificationPro
             </div>
           </div>
         ) : (
-          <ProductJourney 
+          <ProductJourney
             productId={scannedProduct}
             onScanAnother={() => setScannedProduct(null)}
           />
         )}
       </div>
-    </div>
+    </DashboardLayout>
   );
 }

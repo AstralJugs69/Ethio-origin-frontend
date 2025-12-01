@@ -1,36 +1,30 @@
-import { useState } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Welcome from './components/auth/Welcome';
 import RoleSelector from './components/auth/RoleSelector';
 import FarmerDashboard from './components/farmer/FarmerDashboard';
 import ProcessorPortal from './components/processor/ProcessorPortal';
+import LogisticsDashboard from './components/logistics/LogisticsDashboard';
 import ConsumerVerification from './components/consumer/ConsumerVerification';
 
-type AppView = 'welcome' | 'role-select' | 'farmer' | 'processor' | 'consumer';
-
 function App() {
-  const [currentView, setCurrentView] = useState<AppView>('welcome');
-
-  const renderCurrentView = () => {
-    switch (currentView) {
-      case 'welcome':
-        return <Welcome onGetStarted={() => setCurrentView('role-select')} />;
-      case 'role-select':
-        return <RoleSelector onRoleSelect={setCurrentView} />;
-      case 'farmer':
-        return <FarmerDashboard onBack={() => setCurrentView('role-select')} />;
-      case 'processor':
-        return <ProcessorPortal onBack={() => setCurrentView('role-select')} />;
-      case 'consumer':
-        return <ConsumerVerification onBack={() => setCurrentView('role-select')} />;
-      default:
-        return <Welcome onGetStarted={() => setCurrentView('role-select')} />;
-    }
-  };
-
   return (
-    <div className="min-h-screen bg-gray-50">
-      {renderCurrentView()}
-    </div>
+    <Router>
+      <div className="min-h-screen bg-stone-100 font-sans text-stone-900">
+        <Routes>
+          <Route path="/" element={<Welcome />} />
+          <Route path="/roles" element={<RoleSelector />} />
+
+          {/* Role Routes */}
+          <Route path="/farmer/*" element={<FarmerDashboard />} />
+          <Route path="/processor/*" element={<ProcessorPortal />} />
+          <Route path="/logistics/*" element={<LogisticsDashboard />} />
+          <Route path="/consumer/*" element={<ConsumerVerification />} />
+
+          {/* Fallback */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </div>
+    </Router>
   );
 }
 

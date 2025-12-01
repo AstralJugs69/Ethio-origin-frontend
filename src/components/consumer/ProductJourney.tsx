@@ -5,6 +5,9 @@ import { formatDate } from '../../utils/formatters';
 import FarmerStory from './FarmerStory';
 import TipFarmer from './TipFarmer';
 import LoadingSpinner from '../common/LoadingSpinner';
+import { Card, CardContent, CardHeader, CardTitle } from '../ui/Card';
+import { Button } from '../ui/Button';
+import { cn } from '../../utils/cn';
 
 interface ProductJourneyProps {
   productId: string;
@@ -23,62 +26,8 @@ export default function ProductJourney({ productId, onScanAnother }: ProductJour
   const loadBatchData = async () => {
     setIsLoading(true);
     try {
-      // Try to get the batch, if not found, use mock data
-      let batchData = await getBatchById(productId);
-      
-      if (!batchData) {
-        // Create comprehensive mock data for demonstration
-        batchData = {
-          id: productId,
-          farmer: {
-            id: 'farmer_guji001',
-            name: 'Kebede Alazar',
-            region: 'Guji Zone, Oromia',
-            elevation: '2100m',
-            gps: '5.8500° N, 39.0500° E',
-            walletAddress: 'addr_test1qpk8d8f3s4a7...alazar'
-          },
-          cropType: 'coffee',
-          variety: 'Heirloom',
-          initialWeight: 100,
-          currentWeight: 85,
-          location: 'Guji Highlands',
-          harvestDate: '2024-01-15',
-          status: 'processing',
-          grade: 'Grade 1',
-          cuppingScore: 88.5,
-          moistureContent: '11.5%',
-          journey: [
-            {
-              action: 'HARVESTED',
-              timestamp: '2024-01-15T08:00:00Z',
-              actor: { id: 'farmer_guji001', name: 'Kebede Alazar' },
-              data: { notes: 'Premium Arabica cherries harvested at peak ripeness' }
-            },
-            {
-              action: 'PROCESSING_STARTED',
-              timestamp: '2024-01-20T10:00:00Z',
-              actor: { id: 'processor_001', name: 'Dimitu Tero Mill' },
-              data: { 
-                new_weight: 85,
-                moisture_content: '11.5%',
-                cupping_score: 88.5,
-                notes: 'Natural sun-dried process on raised beds'
-              }
-            },
-            {
-              action: 'QUALITY_CHECKED',
-              timestamp: '2024-01-28T14:30:00Z',
-              actor: { id: 'quality_001', name: 'Ethio Quality Control' },
-              data: { 
-                notes: 'Excellent aroma and flavor profile. Ready for export.'
-              }
-            }
-          ]
-        };
-      }
-      
-      setBatch(batchData);
+      const batchData = await getBatchById(productId);
+      setBatch(batchData ?? null);
     } catch (error) {
       console.error('Failed to load batch:', error);
     } finally {
@@ -96,52 +45,72 @@ export default function ProductJourney({ productId, onScanAnother }: ProductJour
 
   if (!batch) {
     return (
-      <div className="bg-white rounded-xl shadow-lg p-8 text-center">
+      <Card className="p-8 text-center">
         <div className="text-red-500 text-4xl mb-4">❌</div>
-        <h3 className="text-xl font-semibold text-gray-700 mb-2">Product Not Found</h3>
-        <p className="text-gray-500 mb-6">
+        <h3 className="text-xl font-semibold text-stone-700 mb-2">Product Not Found</h3>
+        <p className="text-stone-500 mb-6">
           We couldn't find information for this product. It may not be registered in our system.
         </p>
-        <button
-          onClick={onScanAnother}
-          className="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-6 rounded-lg transition"
-        >
+        <Button onClick={onScanAnother}>
           Scan Another Product
-        </button>
-      </div>
+        </Button>
+      </Card>
     );
   }
+
+  // Extract metadata for display
+  const metadata = batch.cip25Metadata?.["721"]?.[batch.policyId || ""]?.[batch.id];
+  const origin = metadata?.origin;
 
   return (
     <div className="space-y-6">
       {/* Product Header */}
-      <div className="bg-white rounded-xl shadow-lg p-6">
-        <div className="flex flex-col md:flex-row md:items-center justify-between">
-          <div className="flex-1">
-            <h2 className="text-2xl font-bold text-gray-800">Guji Highlands Coffee</h2>
-            <p className="text-gray-600">Batch ID: {batch.id}</p>
-            <div className="flex flex-wrap gap-2 mt-2">
-              <span className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-medium">
-                ✓ Verified Origin
-              </span>
-              <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs font-medium">
-                {batch.variety}
-              </span>
-              <span className="bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full text-xs font-medium">
-                {batch.grade}
-              </span>
+      <Card>
+        <CardContent className="p-6">
+          <div className="flex flex-col md:flex-row md:items-center justify-between">
+            <div className="flex-1">
+              <h2 className="text-2xl font-bold text-stone-800">{metadata?.name || `Batch #${batch.id}`}</h2>
+              <p className="text-stone-600">Batch ID: {batch.id}</p>
+              <div className="flex flex-wrap gap-2 mt-2">
+                <span className="bg-emerald-100 text-emerald-800 px-2 py-1 rounded-full text-xs font-medium flex items-center">
+                  <span className="mr-1">✓</span> Verified Organic
+                </span>
+                <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs font-medium">
+                  {batch.variety}
+                </span>
+                <span className="bg-amber-100 text-amber-800 px-2 py-1 rounded-full text-xs font-medium">
+                  {batch.grade}
+                </span>
+              </div>
+            </div>
+            <div className="mt-4 md:mt-0 text-right">
+              <div className="text-lg font-semibold text-emerald-600">Ethio-Origin Certified</div>
+              <p className="text-sm text-stone-500">Blockchain Verified</p>
             </div>
           </div>
-          <div className="mt-4 md:mt-0 text-right">
-            <div className="text-lg font-semibold text-purple-600">Ethio-Origin Certified</div>
-            <p className="text-sm text-gray-500">Blockchain Verified</p>
+        </CardContent>
+      </Card>
+
+      {/* Map Section (Placeholder for now, but structure ready) */}
+      {origin?.gps && (
+        <Card className="overflow-hidden">
+          <div className="h-48 bg-stone-200 relative">
+            {/* In a real app, integrate Leaflet or Google Maps here using origin.gps */}
+            <div className="absolute inset-0 flex items-center justify-center bg-emerald-50">
+              <div className="text-center">
+                <span className="text-4xl mb-2 block">🗺️</span>
+                <p className="text-emerald-800 font-medium">Farm Location</p>
+                <p className="text-emerald-600 text-sm">{origin.gps}</p>
+                <p className="text-emerald-600 text-sm">{origin.region}, {origin.elevation}</p>
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
+        </Card>
+      )}
 
       {/* Navigation Tabs */}
-      <div className="bg-white rounded-xl shadow-lg">
-        <div className="flex border-b border-gray-200">
+      <Card>
+        <div className="flex border-b border-stone-200">
           {[
             { id: 'journey' as const, name: 'Product Journey', icon: '🛣️' },
             { id: 'farmer' as const, name: 'Farmer Story', icon: '👨‍🌾' },
@@ -150,14 +119,15 @@ export default function ProductJourney({ productId, onScanAnother }: ProductJour
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center space-x-2 px-6 py-4 border-b-2 font-medium transition ${
+              className={cn(
+                "flex items-center space-x-2 px-6 py-4 border-b-2 font-medium transition-colors flex-1 md:flex-none justify-center",
                 activeTab === tab.id
-                  ? 'border-purple-500 text-purple-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700'
-              }`}
+                  ? "border-emerald-500 text-emerald-700 bg-emerald-50/30"
+                  : "border-transparent text-stone-500 hover:text-stone-700 hover:bg-stone-50"
+              )}
             >
               <span>{tab.icon}</span>
-              <span>{tab.name}</span>
+              <span className="hidden md:inline">{tab.name}</span>
             </button>
           ))}
         </div>
@@ -167,16 +137,17 @@ export default function ProductJourney({ productId, onScanAnother }: ProductJour
           {activeTab === 'farmer' && <FarmerStory farmer={batch.farmer} />}
           {activeTab === 'tip' && <TipFarmer farmer={batch.farmer} />}
         </div>
-      </div>
+      </Card>
 
       {/* Action Buttons */}
       <div className="flex space-x-4">
-        <button
+        <Button
           onClick={onScanAnother}
-          className="flex-1 bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-4 rounded-lg transition duration-200"
+          className="flex-1"
+          size="lg"
         >
           Scan Another Product
-        </button>
+        </Button>
       </div>
     </div>
   );

@@ -1,3 +1,56 @@
+// CIP-25 Metadata Standard (Label 721)
+export interface CIP25Metadata {
+  "721": {
+    [policyId: string]: {
+      [assetName: string]: {
+        name: string;
+        image: string;
+        mediaType: string;
+        description: string;
+        project: string;
+        origin: {
+          farmer: string;
+          region: string;
+          elevation: string;
+          gps: string;
+          harvest_date: string;
+        };
+        specifications: {
+          variety: string;
+          process: string;
+          initial_weight: string;
+        };
+        files: Array<{
+          name: string;
+          mediaType: string;
+          src: string;
+        }>;
+      };
+    };
+  };
+}
+
+// Status Update Metadata Standard (Label 1001)
+export interface StatusUpdateMetadata {
+  "1001": {
+    batch_id: string;
+    action: string;
+    timestamp: string;
+    actor: {
+      id: string;
+      name: string;
+    };
+    data: {
+      new_weight?: string;
+      moisture_content?: string;
+      cupping_score?: string;
+      notes?: string;
+      [key: string]: any;
+    };
+  };
+}
+
+// Application Types (Mapped from Metadata)
 export interface Farmer {
   id: string;
   name: string;
@@ -8,9 +61,8 @@ export interface Farmer {
 }
 
 export interface Batch {
-  id: string;
+  id: string; // Asset Name (Hex decoded)
   policyId?: string;
-  assetName?: string;
   farmer: Farmer;
   cropType: 'coffee' | 'tea' | 'flowers';
   variety: string;
@@ -22,26 +74,12 @@ export interface Batch {
   grade?: string;
   cuppingScore?: number;
   moistureContent?: string;
-  metadata?: BatchMetadata;
+  
+  // The raw metadata as it appears on-chain
+  cip25Metadata?: CIP25Metadata;
+  
+  // The history of updates (Label 1001 transactions)
   journey: JourneyStep[];
-}
-
-export interface BatchMetadata {
-  name: string;
-  image: string;
-  description: string;
-  origin: {
-    farmer: string;
-    region: string;
-    elevation: string;
-    gps: string;
-    harvest_date: string;
-  };
-  specifications: {
-    variety: string;
-    process: string;
-    initial_weight: string;
-  };
 }
 
 export interface JourneyStep {
@@ -52,10 +90,11 @@ export interface JourneyStep {
     name: string;
   };
   data?: {
-    new_weight?: number;
+    new_weight?: string;
     moisture_content?: string;
-    cupping_score?: number;
+    cupping_score?: string;
     notes?: string;
+    [key: string]: any;
   };
 }
 
@@ -65,14 +104,7 @@ export interface HarvestData {
   location: string;
   variety: string;
   harvestDate: string;
-  process?: string;
-}
-
-export interface StatusUpdateData {
-  batchId: string;
-  action: string;
-  newWeight?: number;
-  moistureContent?: string;
-  cuppingScore?: number;
-  notes?: string;
+  process: string;
+  elevation: string;
+  gps: string;
 }
