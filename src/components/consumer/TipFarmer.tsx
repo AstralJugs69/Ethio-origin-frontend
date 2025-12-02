@@ -16,7 +16,7 @@ export default function TipFarmer({ farmer }: TipFarmerProps) {
 
   const handleSendTip = async () => {
     if (!wallet) return;
-    
+
     setIsSending(true);
     try {
       await sendTip(tipAmount, farmer.walletAddress);
@@ -30,17 +30,21 @@ export default function TipFarmer({ farmer }: TipFarmerProps) {
 
   const presetAmounts = [2, 5, 10, 20, 50];
 
+  const handleConnect = async (walletName: string): Promise<void> => {
+    await connectWallet(walletName);
+  };
+
   return (
     <div>
       <h3 className="text-xl font-semibold text-gray-800 mb-6">Support Your Farmer</h3>
-      
+
       <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6 mb-6">
         <div className="flex items-start space-x-3">
           <span className="text-2xl">💝</span>
           <div>
             <h4 className="font-semibold text-yellow-800 mb-2">Direct Farmer Support</h4>
             <p className="text-yellow-700">
-              Send a direct tip to {farmer.name} using Cardano blockchain. 100% of your tip goes 
+              Send a direct tip to {farmer.name} using Cardano blockchain. 100% of your tip goes
               directly to the farmer's wallet, supporting their family and sustainable farming practices.
             </p>
           </div>
@@ -51,7 +55,7 @@ export default function TipFarmer({ farmer }: TipFarmerProps) {
       <div className="mb-6">
         <h4 className="font-semibold text-gray-800 mb-3">1. Connect Your Wallet</h4>
         <WalletConnector
-          onConnect={connectWallet}
+          onConnect={handleConnect}
           onDisconnect={disconnectWallet}
           wallet={wallet}
           isConnecting={isConnecting}
@@ -68,17 +72,16 @@ export default function TipFarmer({ farmer }: TipFarmerProps) {
                 <button
                   key={amount}
                   onClick={() => setTipAmount(amount)}
-                  className={`p-3 border-2 rounded-lg text-center transition ${
-                    tipAmount === amount
-                      ? 'border-yellow-500 bg-yellow-50 text-yellow-700'
-                      : 'border-gray-200 hover:border-gray-300'
-                  }`}
+                  className={`p-3 border-2 rounded-lg text-center transition ${tipAmount === amount
+                    ? 'border-yellow-500 bg-yellow-50 text-yellow-700'
+                    : 'border-gray-200 hover:border-gray-300'
+                    }`}
                 >
                   <div className="font-semibold">{amount} ADA</div>
                 </button>
               ))}
             </div>
-            
+
             <div className="flex items-center space-x-2">
               <span className="text-gray-600">Or custom amount:</span>
               <input

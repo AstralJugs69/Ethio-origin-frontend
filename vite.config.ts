@@ -13,7 +13,7 @@ export default defineConfig({
         name: 'Ethio-Origin Traceability',
         short_name: 'Ethio-Origin',
         description: 'Farm-to-Market Traceability on Cardano',
-        theme_color: '#047857',
+        theme_color: '#059669',
         background_color: '#ffffff',
         display: 'standalone',
         icons: [

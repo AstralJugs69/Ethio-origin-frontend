@@ -131,7 +131,7 @@ export default function DashboardLayout({ children, role, title, subtitle }: Das
       </div>
 
       {/* Mobile Bottom Nav */}
-      <div className="md:hidden">
+      <div className="md:hidden pb-safe">
         <BottomNav items={navItems} />
       </div>
     </div>

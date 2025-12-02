@@ -74,10 +74,10 @@ export interface Batch {
   grade?: string;
   cuppingScore?: number;
   moistureContent?: string;
-  
+
   // The raw metadata as it appears on-chain
   cip25Metadata?: CIP25Metadata;
-  
+
   // The history of updates (Label 1001 transactions)
   journey: JourneyStep[];
 }
@@ -89,6 +89,7 @@ export interface JourneyStep {
     id: string;
     name: string;
   };
+  location?: string;
   data?: {
     new_weight?: string;
     moisture_content?: string;
@@ -107,4 +108,13 @@ export interface HarvestData {
   process: string;
   elevation: string;
   gps: string;
+}
+
+export interface StatusUpdateData {
+  batchId: string;
+  action: string;
+  newWeight?: number;
+  moistureContent?: string;
+  cuppingScore?: number;
+  notes?: string;
 }

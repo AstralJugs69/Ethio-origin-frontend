@@ -2,6 +2,31 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Mobile-first optimizations */
+:root {
+  --sat: env(safe-area-inset-top);
+  --sab: env(safe-area-inset-bottom);
+  --sal: env(safe-area-inset-left);
+  --sar: env(safe-area-inset-right);
+}
+
+body {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  overscroll-behavior-y: none; /* Prevent pull-to-refresh on mobile if not desired */
+}
+
+/* Prevent text selection on interactive elements for app-like feel */
+.no-select {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* Safe area padding for bottom nav */
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
 /* Base styles */
 * {
   box-sizing: border-box;

@@ -4,7 +4,7 @@ import { Batch, HarvestData, StatusUpdateData } from '../types/supplychain';
 export const createBatch = async (harvestData: HarvestData): Promise<Batch> => {
   // Simulate API call delay
   await new Promise(resolve => setTimeout(resolve, 2000));
-  
+
   const newBatch: Batch = {
     id: `ETH-${harvestData.cropType.toUpperCase()}-${Math.random().toString(36).substr(2, 6).toUpperCase()}`,
     farmer: {
@@ -37,7 +37,7 @@ export const createBatch = async (harvestData: HarvestData): Promise<Batch> => {
 
 export const updateBatchStatus = async (updateData: StatusUpdateData): Promise<Batch> => {
   await new Promise(resolve => setTimeout(resolve, 1500));
-  
+
   const batch = mockBatches.find(b => b.id === updateData.batchId);
   if (!batch) throw new Error('Batch not found');
 
@@ -46,15 +46,15 @@ export const updateBatchStatus = async (updateData: StatusUpdateData): Promise<B
     timestamp: new Date().toISOString(),
     actor: { id: 'current_processor', name: 'Processing Station' },
     data: {
-      new_weight: updateData.newWeight,
+      new_weight: updateData.newWeight?.toString(),
       moisture_content: updateData.moistureContent,
-      cupping_score: updateData.cuppingScore,
+      cupping_score: updateData.cuppingScore?.toString(),
       notes: updateData.notes
     }
   };
 
   batch.journey.push(newStep);
-  
+
   // Update status based on action
   if (updateData.action.includes('PROCESSING')) batch.status = 'processing';
   if (updateData.action.includes('EXPORT')) batch.status = 'exported';

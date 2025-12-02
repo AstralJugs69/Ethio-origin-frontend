@@ -16,15 +16,15 @@ export default function MintBatch({ batch }: MintBatchProps) {
 
   const handleMint = async () => {
     if (!batch || !wallet) return;
-    
+
     setIsMinting(true);
     try {
       // Simulate minting process
       await new Promise(resolve => setTimeout(resolve, 3000));
-      
+
       const tokenId = `token_${batch.id}_${Date.now()}`;
       setMintedToken(tokenId);
-      
+
       console.log('Minting batch:', batch.id);
       console.log('Wallet:', wallet.address);
     } catch (error) {
@@ -47,6 +47,10 @@ export default function MintBatch({ batch }: MintBatchProps) {
       </div>
     );
   }
+
+  const handleConnect = async (walletName: string): Promise<void> => {
+    await connectWallet(walletName);
+  };
 
   return (
     <div className="max-w-4xl mx-auto">
@@ -74,7 +78,7 @@ export default function MintBatch({ batch }: MintBatchProps) {
         <div className="mb-6">
           <h3 className="font-semibold text-gray-800 mb-3">1. Connect Wallet</h3>
           <WalletConnector
-            onConnect={connectWallet}
+            onConnect={handleConnect}
             onDisconnect={disconnectWallet}
             wallet={wallet}
             isConnecting={isConnecting}
@@ -115,7 +119,7 @@ export default function MintBatch({ batch }: MintBatchProps) {
                 <p className="text-green-700 mb-4">
                   Your batch has been tokenized on the Cardano blockchain.
                 </p>
-                <QRCodeDisplay 
+                <QRCodeDisplay
                   data={mintedToken}
                   title="Batch Token QR"
                 />

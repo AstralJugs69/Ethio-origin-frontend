@@ -5,9 +5,10 @@ import { formatDate } from '../../utils/formatters';
 import FarmerStory from './FarmerStory';
 import TipFarmer from './TipFarmer';
 import LoadingSpinner from '../common/LoadingSpinner';
-import { Card, CardContent, CardHeader, CardTitle } from '../ui/Card';
+import { Card, CardContent } from '../ui/Card';
 import { Button } from '../ui/Button';
 import { cn } from '../../utils/cn';
+import ProductJourneyTimeline from './ProductJourneyTimeline';
 
 interface ProductJourneyProps {
   productId: string;
@@ -62,6 +63,57 @@ export default function ProductJourney({ productId, onScanAnother }: ProductJour
   const metadata = batch.cip25Metadata?.["721"]?.[batch.policyId || ""]?.[batch.id];
   const origin = metadata?.origin;
 
+  // Transform batch journey to timeline events
+  const timelineEvents = batch.journey.map((step, index) => {
+    const isLast = index === batch.journey.length - 1;
+
+    // Map action types to icons and titles
+    let icon = '📦';
+    let title = step.action.replace(/_/g, ' ');
+
+    if (step.action.includes('HARVEST')) icon = '🍒';
+    else if (step.action.includes('PROCESS')) icon = '💧';
+    else if (step.action.includes('DRY')) icon = '☀️';
+    else if (step.action.includes('TRANSPORT')) icon = '🚚';
+    else if (step.action.includes('ROAST')) icon = '🔥';
+    else if (step.action.includes('RETAIL')) icon = '☕';
+
+    return {
+      id: `step-${index}`,
+      title: title.charAt(0).toUpperCase() + title.slice(1).toLowerCase(),
+      date: formatDate(step.timestamp),
+      description: step.data?.notes || 'Processing step recorded on blockchain.',
+      icon,
+      location: step.location || 'Unknown Location',
+      status: isLast ? 'current' : 'completed',
+      details: [
+        { label: 'Actor', value: step.actor.name },
+        ...(step.data?.new_weight ? [{ label: 'Weight', value: `${step.data.new_weight}kg` }] : []),
+        ...(step.data?.moisture_content ? [{ label: 'Moisture', value: step.data.moisture_content }] : []),
+        ...(step.data?.cupping_score ? [{ label: 'Score', value: step.data.cupping_score }] : [])
+      ]
+    };
+  });
+
+  // Add the final "Ready for you" step if the journey is active
+  if (timelineEvents.length > 0) {
+    timelineEvents.push({
+      id: 'ready',
+      title: 'Ready for You',
+      date: 'Now',
+      description: 'This product is verified authentic and ready to enjoy.',
+      icon: '✨',
+      location: 'Your Location',
+      status: 'current',
+      details: []
+    });
+    // Set previous last to completed
+    if (timelineEvents.length > 1) {
+      // @ts-ignore
+      timelineEvents[timelineEvents.length - 2].status = 'completed';
+    }
+  }
+
   return (
     <div className="space-y-6">
       {/* Product Header */}
@@ -91,23 +143,6 @@ export default function ProductJourney({ productId, onScanAnother }: ProductJour
         </CardContent>
       </Card>
 
-      {/* Map Section (Placeholder for now, but structure ready) */}
-      {origin?.gps && (
-        <Card className="overflow-hidden">
-          <div className="h-48 bg-stone-200 relative">
-            {/* In a real app, integrate Leaflet or Google Maps here using origin.gps */}
-            <div className="absolute inset-0 flex items-center justify-center bg-emerald-50">
-              <div className="text-center">
-                <span className="text-4xl mb-2 block">🗺️</span>
-                <p className="text-emerald-800 font-medium">Farm Location</p>
-                <p className="text-emerald-600 text-sm">{origin.gps}</p>
-                <p className="text-emerald-600 text-sm">{origin.region}, {origin.elevation}</p>
-              </div>
-            </div>
-          </div>
-        </Card>
-      )}
-
       {/* Navigation Tabs */}
       <Card>
         <div className="flex border-b border-stone-200">
@@ -132,8 +167,11 @@ export default function ProductJourney({ productId, onScanAnother }: ProductJour
           ))}
         </div>
 
-        <div className="p-6">
-          {activeTab === 'journey' && <JourneyTimeline batch={batch} />}
+        <div className="p-6 bg-stone-50/50">
+          {activeTab === 'journey' && (
+            // @ts-ignore
+            <ProductJourneyTimeline events={timelineEvents} />
+          )}
           {activeTab === 'farmer' && <FarmerStory farmer={batch.farmer} />}
           {activeTab === 'tip' && <TipFarmer farmer={batch.farmer} />}
         </div>
@@ -148,71 +186,6 @@ export default function ProductJourney({ productId, onScanAnother }: ProductJour
         >
           Scan Another Product
         </Button>
-      </div>
-    </div>
-  );
-}
-
-// Journey Timeline Component
-function JourneyTimeline({ batch }: { batch: Batch }) {
-  return (
-    <div>
-      <h3 className="text-xl font-semibold text-gray-800 mb-6">From Farm to You</h3>
-      <div className="space-y-6">
-        {batch.journey.map((step, index) => (
-          <div key={index} className="flex items-start space-x-4">
-            <div className="flex flex-col items-center">
-              <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center flex-shrink-0">
-                <span className="text-purple-600 font-bold">{index + 1}</span>
-              </div>
-              {index < batch.journey.length - 1 && (
-                <div className="w-0.5 h-8 bg-gray-200 mt-2"></div>
-              )}
-            </div>
-            <div className="flex-1 pb-6">
-              <div className="flex justify-between items-start mb-1">
-                <h4 className="font-semibold text-gray-800 capitalize">
-                  {step.action.replace(/_/g, ' ').toLowerCase()}
-                </h4>
-                <span className="text-sm text-gray-500">{formatDate(step.timestamp)}</span>
-              </div>
-              <p className="text-gray-700 mb-1">{step.data?.notes || 'Processing step completed'}</p>
-              <p className="text-sm text-gray-500">By: {step.actor.name}</p>
-              
-              {/* Display additional data if available */}
-              {step.data && (
-                <div className="mt-2 grid grid-cols-2 gap-2 text-xs">
-                  {step.data.new_weight && (
-                    <span className="bg-gray-100 px-2 py-1 rounded">Weight: {step.data.new_weight}kg</span>
-                  )}
-                  {step.data.moisture_content && (
-                    <span className="bg-gray-100 px-2 py-1 rounded">Moisture: {step.data.moisture_content}</span>
-                  )}
-                  {step.data.cupping_score && (
-                    <span className="bg-gray-100 px-2 py-1 rounded">Cupping Score: {step.data.cupping_score}</span>
-                  )}
-                </div>
-              )}
-            </div>
-          </div>
-        ))}
-        
-        {/* Final Step - Retail */}
-        <div className="flex items-start space-x-4">
-          <div className="flex flex-col items-center">
-            <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
-              <span className="text-green-600 font-bold">{batch.journey.length + 1}</span>
-            </div>
-          </div>
-          <div className="flex-1">
-            <div className="flex justify-between items-start mb-1">
-              <h4 className="font-semibold text-gray-800">Ready for you</h4>
-              <span className="text-sm text-gray-500">Now</span>
-            </div>
-            <p className="text-gray-700">This product is now available for you to enjoy!</p>
-            <p className="text-sm text-green-600 mt-1">✓ Journey complete</p>
-          </div>
-        </div>
       </div>
     </div>
   );

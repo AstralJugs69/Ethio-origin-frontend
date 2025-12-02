@@ -42,7 +42,7 @@ export default function StatusUpdate({ batchId, onBatchChange }: StatusUpdatePro
       const batchData = await getBatchById(id);
       if (batchData) {
         setBatch(batchData);
-        setFormData(prev => ({
+        setFormData((prev: StatusUpdateData) => ({
           ...prev,
           batchId: id,
           newWeight: batchData.currentWeight || batchData.initialWeight
@@ -64,7 +64,7 @@ export default function StatusUpdate({ batchId, onBatchChange }: StatusUpdatePro
       await updateBatch(formData);
       // Reload batch to get updated data
       await loadBatch(batch.id);
-      
+
       // Reset form for next update
       setFormData({
         batchId: batch.id,
@@ -82,7 +82,7 @@ export default function StatusUpdate({ batchId, onBatchChange }: StatusUpdatePro
   };
 
   const handleChange = (field: keyof StatusUpdateData, value: string | number) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData((prev: StatusUpdateData) => ({ ...prev, [field]: value }));
   };
 
   if (isLoading) {
@@ -150,11 +150,10 @@ export default function StatusUpdate({ batchId, onBatchChange }: StatusUpdatePro
                   key={action.value}
                   type="button"
                   onClick={() => handleChange('action', action.value)}
-                  className={`p-4 border-2 rounded-lg text-left transition ${
-                    formData.action === action.value
+                  className={`p-4 border-2 rounded-lg text-left transition ${formData.action === action.value
                       ? 'border-blue-500 bg-blue-50'
                       : 'border-gray-200 hover:border-gray-300'
-                  }`}
+                    }`}
                 >
                   <div className="font-medium text-gray-800">{action.label}</div>
                   <div className="text-sm text-gray-600">{action.description}</div>
